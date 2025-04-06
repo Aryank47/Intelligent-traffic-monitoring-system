@@ -114,9 +114,9 @@ The app automatically downscales images larger than the specified max_dim (defau
 The sliding-window approach can be computationally intensive on high-resolution images. Consider running the app on a machine with sufficient processing power or further optimizing window parameters.
 
 5. Acknowledgements
-	•	Vehicle and non-vehicle datasets courtesy of Udacity.
-	•	Libraries used:
-	•	OpenCV
-	•	scikit-image
-	•	scikit-learn
-	•	Streamlit
+Vehicle and non-vehicle datasets courtesy of Udacity.
+Libraries used:
+	OpenCV
+	scikit-image
+	scikit-learn
+	Streamlit
