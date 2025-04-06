@@ -116,7 +116,7 @@ The sliding-window approach can be computationally intensive on high-resolution 
 5. Acknowledgements
 Vehicle and non-vehicle datasets courtesy of Udacity.
 Libraries used:
-	OpenCV
+  OpenCV
 	scikit-image
 	scikit-learn
 	Streamlit
