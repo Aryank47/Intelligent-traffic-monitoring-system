@@ -3,7 +3,7 @@ from google.colab.patches import cv2_imshow
 import numpy as np
 
 # Load the Haar cascade
-vehicle_cascade = cv2.CascadeClassifier("/content/haarcascade_car.xml")
+vehicle_cascade = cv2.CascadeClassifier("haarcascade_car.xml")
 if vehicle_cascade.empty():
     print("Error: Cascade file not loaded")
     exit()
