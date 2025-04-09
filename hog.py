@@ -349,14 +349,14 @@ def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
 
 
 # -------------------- Main Streamlit Application --------------------
-def main():
-    st.title("Real-Time Traffic Density Detection using HOG+SVM Vehicle Detector")
-    st.markdown(
-        """
-    **For single images**: This code uses a multi-scale sliding window approach (no background subtraction).  
-    **For videos**: It uses background subtraction + HOG+SVM for moving objects.
-    """
-    )
+def hogmain():
+    # st.title("Real-Time Traffic Density Detection using HOG+SVM Vehicle Detector")
+    # st.markdown(
+    #     """
+    # **For single images**: This code uses a multi-scale sliding window approach (no background subtraction).  
+    # **For videos**: It uses background subtraction + HOG+SVM for moving objects.
+    # """
+    # )
 
     # Check if dataset directories exist
     if not os.path.exists(DATASET_VEHICLE_DIR) or not os.path.exists(
@@ -500,4 +500,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    hogmain()
