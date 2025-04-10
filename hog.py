@@ -115,7 +115,7 @@ def train_model():
         X_scaled, y, test_size=0.2, random_state=42
     )
 
-    clf = LinearSVC(max_iter=150000)
+    clf = LinearSVC(dual=True, max_iter=150000)
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
     st.write(f"Validation Accuracy: {acc * 100:.2f}%")
