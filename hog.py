@@ -8,6 +8,7 @@ import joblib
 import numpy as np
 import streamlit as st
 from skimage.feature import hog
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
@@ -118,6 +119,18 @@ def train_model():
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
     st.write(f"Validation Accuracy: {acc * 100:.2f}%")
+
+    # Calculate other metrics
+    y_pred = clf.predict(X_test)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    st.write(
+        f"Precision: {precision * 100:.2f}%, Recall: {recall * 100:.2f}%, F1-Score: {f1 * 100:.2f}%"
+    )
+    # Or use a full classification report:
+    # report = classification_report(y_test, y_pred)
+    # st.text("Classification Report:\n" + report)
 
     # Save the trained classifier and scaler for later use
     joblib.dump(clf, MODEL_PATH)
@@ -422,6 +435,8 @@ def hog_main():
             stframe = st.empty()
             density_info = st.empty()
 
+            frame_count = 0
+            start_time = time.time()
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
@@ -455,6 +470,13 @@ def hog_main():
                 density_info.markdown(
                     f"**Detected Vehicles:** {vehicle_count} | **Traffic Density:** {density}"
                 )
+                frame_count += 1
+                # Optionally, update FPS display every few frames:
+                if frame_count % 10 == 0:
+                    current_time = time.time()
+                    elapsed = current_time - start_time
+                    effective_fps = frame_count / elapsed
+                    st.write(f"Effective Processing FPS: {effective_fps:.2f}")
 
-                time.sleep(0.03)
+                # time.sleep(0.03)
             cap.release()

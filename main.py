@@ -18,7 +18,8 @@ def main():
 
     # Dropdown to select the method
     method = st.selectbox(
-        "Select the detection method:", ["HOG", "RCNN", "Haar Cascade"]
+        "Select the detection method:",
+        ["Select a method", "HOG", "RCNN", "Haar Cascade"],
     )
 
     # Based on the selection, call the appropriate method
@@ -34,7 +35,11 @@ def main():
         st.info("Using Haar Cascade method for vehicle detection.")
         st.info(
             "RUNNING Haar Cascade..."
-        )  # Call the harrmain method from the harr module
+        )  # Call the harrmain method from the harr modul
+    else:
+        st.write(
+            "Please select a detection method from the dropdown above to run the code."
+        )
 
 
 if __name__ == "__main__":
