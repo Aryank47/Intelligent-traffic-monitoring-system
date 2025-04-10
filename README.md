@@ -37,6 +37,29 @@ The approach:
 - scikit-learn
 - joblib
 
+# Approach 2
+
+## Haar Cascade Classifier
+
+This approach uses a combination of Haar Cascade detection, image preprocessing, and morphological operations to effectively detect vehicles in video frames. The code is capable of processing real-time video, highlighting detected vehicles with bounding boxes, and displaying the results interactively. By tuning the parameters of the Haar Cascade detector and image processing techniques, this method can be adapted to different environments and videos for vehicle detection tasks.
+
+## Overview
+
+This approach utilizes Haar Cascade Classifier for vehicle detection in video frames. By processing video frames through grayscale conversion, adaptive thresholding, and morphological operations, it detects and highlights vehicles in real-time. It works by analyzing a defined Region of Interest (ROI) in the video/image to identify vehicles with the help of the pre-trained Haar Cascade model (haarcascade_car.xml).
+
+## Features
+
+- **Real-time Vehicle Detection** Detects vehicles frame-by-frame in video files.
+- **ROI Selection** Focuses on specific areas of the frame, excluding irrelevant regions like the sky.
+- **Image Preprocessing** Uses grayscale conversion, contrast enhancement, Gaussian blur, and adaptive thresholding for better detection.
+- **Bounding Boxes** Draws bounding boxes around detected vehicles for visualization.
+
+## Prerequisites
+
+- Python 3.7 or higher
+- OpenCV
+- NumPy
+
 ## Installation
 
 1. **Clone the Repository:**

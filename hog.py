@@ -8,6 +8,7 @@ import joblib
 import numpy as np
 import streamlit as st
 from skimage.feature import hog
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
@@ -114,10 +115,22 @@ def train_model():
         X_scaled, y, test_size=0.2, random_state=42
     )
 
-    clf = LinearSVC(max_iter=150000)
+    clf = LinearSVC(dual=True, max_iter=150000)
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
     st.write(f"Validation Accuracy: {acc * 100:.2f}%")
+
+    # Calculate other metrics
+    y_pred = clf.predict(X_test)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    st.write(
+        f"Precision: {precision * 100:.2f}%, Recall: {recall * 100:.2f}%, F1-Score: {f1 * 100:.2f}%"
+    )
+    # Or use a full classification report:
+    # report = classification_report(y_test, y_pred)
+    # st.text("Classification Report:\n" + report)
 
     # Save the trained classifier and scaler for later use
     joblib.dump(clf, MODEL_PATH)
@@ -278,38 +291,6 @@ def detect_vehicles_in_image_sliding_window(
 
 # -------------------- Vehicle Detection on a Frame --------------------
 
-# def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
-#     """
-#     Uses background subtraction to identify candidate regions and then applies
-#     the trained SVM classifier (using HOG features) to verify vehicles.
-#     """
-#     # Enhance contrast using CLAHE
-#     enhanced_frame = apply_clahe(frame)
-
-#     # Apply background subtraction to extract moving regions
-#     fg_mask = bg_subtractor.apply(enhanced_frameframe)
-#     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-#     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel, iterations=2)
-#     contours, _ = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-#     vehicle_boxes = []
-#     for cnt in contours:
-#         if cv2.contourArea(cnt) > 500:  # Filter out small regions
-#             x, y, w, h = cv2.boundingRect(cnt)
-#             roi = frame[y : y + h, x : x + w]
-#             if roi.size == 0:
-#                 continue
-#             # Resize ROI to expected size and convert to grayscale
-#             roi_gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-#             roi_resized = cv2.resize(roi_gray, IMAGE_SIZE)
-#             hog_feat = extract_hog_features(roi_resized)
-#             hog_feat = hog_feat.reshape(1, -1)
-#             hog_feat_scaled = scaler.transform(hog_feat)
-#             prediction = clf.predict(hog_feat_scaled)
-#             if prediction[0] == 1:
-#                 vehicle_boxes.append((x, y, w, h))
-#     return vehicle_boxes, fg_mask
-
 
 def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
     """
@@ -349,14 +330,7 @@ def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
 
 
 # -------------------- Main Streamlit Application --------------------
-def hogmain():
-    # st.title("Real-Time Traffic Density Detection using HOG+SVM Vehicle Detector")
-    # st.markdown(
-    #     """
-    # **For single images**: This code uses a multi-scale sliding window approach (no background subtraction).  
-    # **For videos**: It uses background subtraction + HOG+SVM for moving objects.
-    # """
-    # )
+def hog_main():
 
     # Check if dataset directories exist
     if not os.path.exists(DATASET_VEHICLE_DIR) or not os.path.exists(
@@ -461,6 +435,8 @@ def hogmain():
             stframe = st.empty()
             density_info = st.empty()
 
+            frame_count = 0
+            start_time = time.time()
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
@@ -494,10 +470,13 @@ def hogmain():
                 density_info.markdown(
                     f"**Detected Vehicles:** {vehicle_count} | **Traffic Density:** {density}"
                 )
+                frame_count += 1
+                # Optionally, update FPS display every few frames:
+                if frame_count % 10 == 0:
+                    current_time = time.time()
+                    elapsed = current_time - start_time
+                    effective_fps = frame_count / elapsed
+                    st.write(f"Effective Processing FPS: {effective_fps:.2f}")
 
-                time.sleep(0.03)
+                # time.sleep(0.03)
             cap.release()
-
-
-if __name__ == "__main__":
-    hogmain()
