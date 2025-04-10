@@ -278,38 +278,6 @@ def detect_vehicles_in_image_sliding_window(
 
 # -------------------- Vehicle Detection on a Frame --------------------
 
-# def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
-#     """
-#     Uses background subtraction to identify candidate regions and then applies
-#     the trained SVM classifier (using HOG features) to verify vehicles.
-#     """
-#     # Enhance contrast using CLAHE
-#     enhanced_frame = apply_clahe(frame)
-
-#     # Apply background subtraction to extract moving regions
-#     fg_mask = bg_subtractor.apply(enhanced_frameframe)
-#     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-#     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel, iterations=2)
-#     contours, _ = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-#     vehicle_boxes = []
-#     for cnt in contours:
-#         if cv2.contourArea(cnt) > 500:  # Filter out small regions
-#             x, y, w, h = cv2.boundingRect(cnt)
-#             roi = frame[y : y + h, x : x + w]
-#             if roi.size == 0:
-#                 continue
-#             # Resize ROI to expected size and convert to grayscale
-#             roi_gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-#             roi_resized = cv2.resize(roi_gray, IMAGE_SIZE)
-#             hog_feat = extract_hog_features(roi_resized)
-#             hog_feat = hog_feat.reshape(1, -1)
-#             hog_feat_scaled = scaler.transform(hog_feat)
-#             prediction = clf.predict(hog_feat_scaled)
-#             if prediction[0] == 1:
-#                 vehicle_boxes.append((x, y, w, h))
-#     return vehicle_boxes, fg_mask
-
 
 def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
     """
@@ -349,14 +317,7 @@ def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
 
 
 # -------------------- Main Streamlit Application --------------------
-def hogmain():
-    # st.title("Real-Time Traffic Density Detection using HOG+SVM Vehicle Detector")
-    # st.markdown(
-    #     """
-    # **For single images**: This code uses a multi-scale sliding window approach (no background subtraction).  
-    # **For videos**: It uses background subtraction + HOG+SVM for moving objects.
-    # """
-    # )
+def hog_main():
 
     # Check if dataset directories exist
     if not os.path.exists(DATASET_VEHICLE_DIR) or not os.path.exists(
@@ -497,7 +458,3 @@ def hogmain():
 
                 time.sleep(0.03)
             cap.release()
-
-
-if __name__ == "__main__":
-    hogmain()
