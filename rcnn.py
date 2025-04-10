@@ -5,6 +5,7 @@ from PIL import Image
 import torchvision.transforms as T
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
@@ -24,6 +25,7 @@ LOW_THRESHOLD = 3  # Less than 3 detections -> Low Traffic
 HIGH_THRESHOLD = 6  # 3-5 detections -> Medium Traffic; 6 or more -> High Traffic
 
 MODEL_PATH = "RCNN_FineTune_epoch_18.pth"
+FASTER_MODEL_PATH = "fasterrcnn_scripted.pt"
 # SCALER_PATH = "scaler.pkl"
 
 TRAIN_DATASET_DIR = os.path.join("data", "vehicles")
@@ -83,6 +85,7 @@ class UADETRACDatasetTXT(Dataset):
 
 def get_model(num_classes, device):
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    # model = fasterrcnn_mobilenet_v3_large_fpn(pretrained=True)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
@@ -148,8 +151,12 @@ def evaluate_image(image, model, device, threshold=0.5):
     img_tensor = to_tensor(image).to(device)
 
     with torch.no_grad():
-        output = model([img_tensor])[0]
+        output = model(img_tensor)
 
+
+    # boxes = output[0]['boxes'].cpu().numpy()
+    # scores = output[0]['scores'].cpu().numpy()
+    # boxes, scores = output
     boxes = output["boxes"].cpu().numpy()
     scores = output["scores"].cpu().numpy()
     thresholdBoxes = []
@@ -166,10 +173,37 @@ def evaluate_image(image, model, device, threshold=0.5):
     # plt.show()
     return thresholdBoxes
 
+class WrappedModel(torch.nn.Module):
+    def __init__(self, model):
+        super().__init__()
+        self.model = model
+
+    def forward(self, x):
+        out = self.model([x])[0]
+        # Only return tensors or dicts/lists of tensors
+        return out #(out["boxes"], out["scores"])  # Or whatever makes sense for your case
+    
+
+def convert_to_torchscript(model, example_input):
+    model.eval()
+    with torch.no_grad():
+        scripted = torch.jit.trace(WrappedModel(model), example_input, strict=False)
+    scripted.save("fasterrcnn_scripted.pt")
+    print("✅ TorchScript model saved as fasterrcnn_scripted.pt")
+    
+
 def rcnnmain():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = get_model(2, device)
+    if not os.path.exists(FASTER_MODEL_PATH):
+        
+        model = get_model(2, device)
+        dummy_input = torch.rand(3, 480, 640).to(device)
+        convert_to_torchscript(model, dummy_input)
+
+    model = torch.jit.load(FASTER_MODEL_PATH)
+    model.to(device)
     model.eval()
+    
 
     uploaded_file = st.file_uploader(
         "Upload an image or video file", type=["jpg", "jpeg", "png", "mp4", "avi"]
@@ -187,13 +221,13 @@ def rcnnmain():
                 return
 
             # Preprocess: Downscale if needed
-            image_proc, scale_factor = hog.preprocess_image_for_detection(image, max_dim=360)
+            # image_proc, scale_factor = hog.preprocess_image_for_detection(image, max_dim=360)
 
             # Use sliding-window detection on single image
             st.info(
-                "Detecting vehicles in single image using sliding window approach. Please wait..."
+                "Detecting vehicles in single image Please wait..."
             )
-            boxes = evaluate_image(image_proc, model, device, threshold=0.6)
+            boxes = evaluate_image(image, model, device, threshold=0.85)
 
             vehicle_count = len(boxes)
             # Draw bounding boxes on the image
@@ -206,7 +240,7 @@ def rcnnmain():
             st.image(
                 image_rgb,
                 caption=f"Detected Vehicles: {vehicle_count}",
-                use_container_width=True,
+                use_container_width=False,
             )
 
             # Classify overall traffic density
@@ -237,8 +271,9 @@ def rcnnmain():
                     break
 
                 # NOTE: 'frame' is in BGR by default from OpenCV
-                vehicle_boxes = evaluate_image(frame, model, device, threshold=0.6) #detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler)
+                vehicle_boxes = evaluate_image(frame, model, device, threshold=0.75) #detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler)
                 vehicle_count = len(vehicle_boxes)
+                print(vehicle_boxes)
 
                 # Draw bounding boxes
                 for x1, y1, x2, y2 in vehicle_boxes:
@@ -258,7 +293,7 @@ def rcnnmain():
                 stframe.image(
                     frame_rgb,
                     caption=f"Traffic Density: {density} (Vehicles: {vehicle_count})",
-                    use_container_width=True,
+                    use_container_width=False,
                 )
                 density_info.markdown(
                     f"**Detected Vehicles:** {vehicle_count} | **Traffic Density:** {density}"
@@ -269,4 +304,10 @@ def rcnnmain():
 
 
 if __name__ == "__main__":
-    evaluate_image("D:/Sem3/CV/Project/DETRAC_Upload/images/val/MVI_39031_img00002.jpg", threshold=0.8)
+    # rcnnmain()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = torch.jit.load(FASTER_MODEL_PATH)
+    model.to(device)
+    model.eval()
+    img = Image.open("D:/Sem3/CV/Project/DETRAC_Upload/images/val/MVI_39031_img00002.jpg").convert("RGB")
+    evaluate_image(img, model, device, threshold=0.8)
