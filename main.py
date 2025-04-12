@@ -1,6 +1,6 @@
 import streamlit as st
 
-# import harr
+import harr
 import hog
 
 # import rcnn
@@ -33,9 +33,7 @@ def main():
 
     elif method == "Haar Cascade":
         st.info("Using Haar Cascade method for vehicle detection.")
-        st.info(
-            "RUNNING Haar Cascade..."
-        )  # Call the harrmain method from the harr modul
+        harr.harrmain()
     else:
         st.write(
             "Please select a detection method from the dropdown above to run the code."
