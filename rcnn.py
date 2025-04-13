@@ -24,7 +24,7 @@ IMAGE_SIZE = (64, 64)  # All images will be resized to 64x64 for HOG
 LOW_THRESHOLD = 3  # Less than 3 detections -> Low Traffic
 HIGH_THRESHOLD = 6  # 3-5 detections -> Medium Traffic; 6 or more -> High Traffic
 
-MODEL_PATH = "RCNN_FineTune_epoch_18.pth"
+MODEL_PATH = "MobRCNNFresh_FineTune_epoch_19.pth"
 FASTER_MODEL_PATH = "fasterrcnn_scripted.pt"
 # SCALER_PATH = "scaler.pkl"
 
@@ -84,8 +84,8 @@ class UADETRACDatasetTXT(Dataset):
         return img, target
 
 def get_model(num_classes, device):
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-    # model = fasterrcnn_mobilenet_v3_large_fpn(pretrained=True)
+    # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    model = fasterrcnn_mobilenet_v3_large_fpn(pretrained=True)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
@@ -271,9 +271,12 @@ def rcnnmain():
                     break
 
                 # NOTE: 'frame' is in BGR by default from OpenCV
-                vehicle_boxes = evaluate_image(frame, model, device, threshold=0.75) #detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler)
-                vehicle_count = len(vehicle_boxes)
-                print(vehicle_boxes)
+                try:
+                    vehicle_boxes = evaluate_image(frame, model, device, threshold=0.75) #detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler)
+                    vehicle_count = len(vehicle_boxes)
+                    print(vehicle_boxes)
+                except:
+                    continue
 
                 # Draw bounding boxes
                 for x1, y1, x2, y2 in vehicle_boxes:

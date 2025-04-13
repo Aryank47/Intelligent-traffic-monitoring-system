@@ -2,8 +2,7 @@ import streamlit as st
 
 import harr
 import hog
-
-# import rcnn
+import rcnn
 
 # -------------------- Main Streamlit Application --------------------
 
@@ -30,6 +29,7 @@ def main():
     elif method == "RCNN":
         st.info("Using RCNN method for vehicle detection.")
         st.info("RUNNING RCNN...")  # Call the rcnnmain method from the rcnn module
+        rcnn.rcnnmain()
 
     elif method == "Haar Cascade":
         st.info("Using Haar Cascade method for vehicle detection.")
