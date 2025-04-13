@@ -333,17 +333,17 @@ def detect_vehicles_in_frame(frame, bg_subtractor, clf, scaler):
 def hog_main():
 
     # Check if dataset directories exist
-    if not os.path.exists(DATASET_VEHICLE_DIR) or not os.path.exists(
-        DATASET_NONVEHICLE_DIR
-    ):
-        st.error(
-            "Dataset not found. Please download the vehicle and non-vehicle images from the URLs below and extract them as follows:\n\n"
-            "**Vehicles:** https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip\n\n"
-            "**Non-Vehicles:** https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip\n\n"
-            "Extract the archives so that the directory structure is:\n"
-            "`data/vehicles` and `data/non-vehicles`"
-        )
-        return
+    # if not os.path.exists(DATASET_VEHICLE_DIR) or not os.path.exists(
+    #     DATASET_NONVEHICLE_DIR
+    # ):
+    #     st.error(
+    #         "Dataset not found. Please download the vehicle and non-vehicle images from the URLs below and extract them as follows:\n\n"
+    #         "**Vehicles:** https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip\n\n"
+    #         "**Non-Vehicles:** https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip\n\n"
+    #         "Extract the archives so that the directory structure is:\n"
+    #         "`data/vehicles` and `data/non-vehicles`"
+    #     )
+    #     return
 
     # Load or train the classifier model
     if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
@@ -450,7 +450,7 @@ def hog_main():
 
                 # Draw bounding boxes
                 for x, y, w, h in vehicle_boxes:
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 # Classify traffic density
                 if vehicle_count < LOW_THRESHOLD:
@@ -476,7 +476,7 @@ def hog_main():
                     current_time = time.time()
                     elapsed = current_time - start_time
                     effective_fps = frame_count / elapsed
-                    st.write(f"Effective Processing FPS: {effective_fps:.2f}")
+                    # st.write(f"Effective Processing FPS: {effective_fps:.2f}")
 
                 # time.sleep(0.03)
             cap.release()
