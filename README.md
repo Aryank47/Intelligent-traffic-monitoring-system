@@ -83,6 +83,17 @@ This approach utilizes Haar Cascade Classifier for vehicle detection in video fr
 - **Image Preprocessing** Uses grayscale conversion, contrast enhancement, Gaussian blur, and adaptive thresholding for better detection.
 - **Bounding Boxes** Draws bounding boxes around detected vehicles for visualization.
 
+# Approach 3
+
+## Region - Based RCNN approach
+R-CNN (Region-based Convolutional Neural Network) is a deep learning object detection framework. For this project FastRCNN was implemented and fine tuned on UA-DETRAC dataset available on - https://www.kaggle.com/datasets/dtrnngc/ua-detrac-dataset. However due to latency issues a student model fasterrcnn_mobilenet was fined tuned instead and used for inferencing. An SSDLite model was tried with extensive training but failed to provide good enough accuracy even though it was much faster to inference. 
+
+## Known issues
+•	Non moving i.e. static vehicles also detected even though not contributing to the traffic
+•	Eventhough mobile net is faster but still slow for a good realtime user friendly response
+•	Distant vehicles detected as an aggregate for the current point in time traffic count
+
+
 ## Prerequisites
 
 - Python 3.7 or higher
