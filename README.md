@@ -37,6 +37,35 @@ The approach:
 - scikit-learn
 - joblib
 
+2.	Usage:
+For Images: Upload a static image (JPG, JPEG, or PNG). The application will downscale high-resolution images if necessary, run a sliding-window detector, and display bounding boxes and traffic density.
+
+For Videos: Upload a video file (MP4 or AVI). The app will process video frames using background subtraction and display real-time vehicle detection along with the traffic density classification.
+
+3. Code Structure
+  •	HOG Feature Extraction:
+  Located in extract_hog_features() function – computes HOG descriptors for given images.
+  •	Dataset Loading & Training:
+  The load_dataset() and train_model() functions load image data, extract features, and train the Linear SVM. The model is saved using joblib.
+  •	Detection Pipeline:
+  •	Static Images: Uses detect_vehicles_in_image_sliding_window() for multi-scale sliding-window detection.
+  •	Videos: Uses detect_vehicles_in_frame() combined with background subtraction.
+  •	CLAHE Enhancement:
+  Applied through the apply_clahe() function to boost contrast.
+  •	Preprocessing:
+  High-resolution images are downscaled in preprocess_image_for_detection().
+  •	Streamlit Interface:
+  The main application logic resides in the main() function which handles file uploads and result visualization.
+
+4. Troubleshooting & Tips
+	•	High-Resolution Images:
+The app automatically downscales images larger than the specified max_dim (default is 360). Adjust the max_dim parameter in preprocess_image_for_detection() if needed.
+	•	False Positives/Negatives:
+	•	Tweak parameters such as step_size, scale_factors, and decision_threshold in detect_vehicles_in_image_sliding_window().
+	•	Retrain the SVM with more diverse training data if detections are not satisfactory.
+	•	Performance:
+The sliding-window approach can be computationally intensive on high-resolution images. Consider running the app on a machine with sufficient processing power or further optimizing window parameters.
+
 # Approach 2
 
 ## Haar Cascade Classifier
@@ -65,7 +94,7 @@ This approach utilizes Haar Cascade Classifier for vehicle detection in video fr
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/Aryank47/Intelligent-traffic-monitoring-system.git
-   cd traffic-density-detection
+   cd Intelligent-traffic-monitoring-system
    ```
 
 2.	Create a Virtual Environment (Optional but Recommended):
@@ -104,42 +133,5 @@ The application can automatically train the model if the trained model files (ve
 Running the Application
 	1.	Launch the App:
   ```bash
-  streamlit run hog.py
+  streamlit run main.py
   ```
-
-2.	Usage:
-    For Images: Upload a static image (JPG, JPEG, or PNG). The application will downscale high-resolution images if necessary, run a sliding-window detector, and display bounding boxes and traffic density.
-
-    For Videos: Upload a video file (MP4 or AVI). The app will process video frames using background subtraction and display real-time vehicle detection along with the traffic density classification.
-
-3. Code Structure
-  •	HOG Feature Extraction:
-  Located in extract_hog_features() function – computes HOG descriptors for given images.
-  •	Dataset Loading & Training:
-  The load_dataset() and train_model() functions load image data, extract features, and train the Linear SVM. The model is saved using joblib.
-  •	Detection Pipeline:
-  •	Static Images: Uses detect_vehicles_in_image_sliding_window() for multi-scale sliding-window detection.
-  •	Videos: Uses detect_vehicles_in_frame() combined with background subtraction.
-  •	CLAHE Enhancement:
-  Applied through the apply_clahe() function to boost contrast.
-  •	Preprocessing:
-  High-resolution images are downscaled in preprocess_image_for_detection().
-  •	Streamlit Interface:
-  The main application logic resides in the main() function which handles file uploads and result visualization.
-
-4. Troubleshooting & Tips
-	•	High-Resolution Images:
-The app automatically downscales images larger than the specified max_dim (default is 360). Adjust the max_dim parameter in preprocess_image_for_detection() if needed.
-	•	False Positives/Negatives:
-	•	Tweak parameters such as step_size, scale_factors, and decision_threshold in detect_vehicles_in_image_sliding_window().
-	•	Retrain the SVM with more diverse training data if detections are not satisfactory.
-	•	Performance:
-The sliding-window approach can be computationally intensive on high-resolution images. Consider running the app on a machine with sufficient processing power or further optimizing window parameters.
-
-5. Acknowledgements
-Vehicle and non-vehicle datasets courtesy of Udacity.
-Libraries used:
-  OpenCV
-	scikit-image
-	scikit-learn
-	Streamlit
